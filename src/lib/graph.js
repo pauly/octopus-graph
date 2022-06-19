@@ -5,14 +5,8 @@ const byTimestamp = (a, b) => a[0] - b[0]
 
 const thisYear = new Date().getYear()
 
-const defaultAddComment = ({ x, y, maxX, maxY, color, label, ts, value, comments }) => {
-  if (value === maxY) {
-    if (ts !== maxX) return `<text font-size="smaller" fill="${color}" x="${x + 10}" y="${y}">${label} ${value}</text>`
-  }
-}
-
 module.exports = ({
-  addComment = defaultAddComment,
+  addComment = () => {},
   border = '#000',
   colors = [
     'red',
