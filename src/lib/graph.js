@@ -63,8 +63,7 @@ module.exports = ({
       x = marginLeft + Math.round((ts - floorX) / (ceilX - floorX) * maxWidth)
       const height = Math.round((value - floorY) / (ceilY - floorY) * maxHeight)
       y = maxHeight + marginTop - height
-      const comment = addComment({ x, y, maxX, maxY, color, label, ts, value, comments })
-      if (comment) comments.push(comment)
+      comments.push(addComment({ x, y, maxX, maxY, color, label, ts, value, comments }))
       return [x, y]
     }).filter(Boolean).join(' ') + '" fill="none" />'
     return `<svg stroke="${color}">\n    ${descriptionTag}\n    ${path}\n  </svg>\n  <text fill="${color}" x="${x}" y="${y}">${label || value}</text>${comments.length ? '\n  ' + comments.filter(Boolean).join('\n  ') : ''}`
