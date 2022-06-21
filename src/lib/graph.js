@@ -1,4 +1,4 @@
-// graph library I wrote gor popex
+// graph library I wrote for popex
 // designed to create some unbloated svg of a graph
 
 const byTimestamp = (a, b) => a[0] - b[0]
@@ -66,12 +66,14 @@ module.exports = ({
       comments.push(addComment({ x, y, maxX, maxY, color, label, ts, value, comments }))
       return [x, y]
     }).filter(Boolean).join(' ') + '" fill="none" />'
-    return `<svg stroke="${color}">\n    ${descriptionTag}\n    ${path}\n  </svg>\n  <text fill="${color}" x="${x}" y="${y}">${label || value}</text>${comments.length ? '\n  ' + comments.filter(Boolean).join('\n  ') : ''}`
+    return `<g stroke="${color}">\n    ${descriptionTag}\n    ${path}\n  </g>\n  <text fill="${color}" x="${x}" y="${y}">${label || value}</text>${comments.length ? '\n  ' + comments.filter(Boolean).join('\n  ') : ''}`
   }
 
   const priceLine = dataSets.map((chartData, index) => line(chartData, colors[index] || 'black', labels && labels[index])).join('\n  ')
 
-  let axis = `<svg fill="${border}" text-anchor="end">\n    <path d="m ${marginLeft} ${marginTop} v ${maxHeight} h ${maxWidth}" stroke="${border}" fill="transparent" stroke-width="2" />\n`
+  let axis = `<path d="m ${marginLeft} ${marginTop} v ${maxHeight} h ${maxWidth} h -${maxWidth} v -${maxHeight} z" stroke="${border}" stroke-width="2" />\n`
+  axis += `  <g fill="${border}" text-anchor="end" transform="translate(${marginLeft}, ${maxHeight + marginTop})">\n`
+
   let interval = 5000
   while (interval >= ceilY) {
     interval = interval / 10
@@ -79,15 +81,14 @@ module.exports = ({
   for (let value = 0; value < ceilY; value += interval) {
     if (value < floorY) continue
     const height = Math.round((value - floorY) / (ceilY - floorY) * maxHeight)
-    const y = maxHeight + marginTop - height
-    axis += `    <text x="${marginLeft}" y="${y}">${value} -</text>\n`
+    axis += `    <text y="-${height}">${value} -</text>\n` // x=0
   }
   const firstDateLabelX = new Date(floorX)
-  firstDateLabelX.setDate(firstDateLabelX.getDate() + 1)
+  // firstDateLabelX.setDate(firstDateLabelX.getDate() + 1)
   firstDateLabelX.setHours(0, 0, 0, 0)
   ts = firstDateLabelX.getTime()
   const stepInMonths = (ceilX - floorX) / (1000 * 60 * 60 * 24) > 30
-  const anchor = stepInMonths ? '' : ' text-anchor="start"' // actually wrong anchoring if stepping in months @todo
+  axis += `    <g text-anchor="start" transform="translate(0, ${margin})">\n`
   while (ts < ceilX) {
     const dateX = new Date(ts)
     if (stepInMonths) {
@@ -98,8 +99,7 @@ module.exports = ({
       dateX.setHours(0, 0, 0, 0)
     }
     ts = dateX.getTime()
-    const y = maxHeight + marginTop + margin / 2
-    const x = marginLeft + Math.round((ts - floorX) / (ceilX - floorX) * maxWidth)
+    const x = Math.round((ts - floorX) / (ceilX - floorX) * maxWidth)
     let label = String(new Date(ts)).substr(4, 6)
     if (stepInMonths) {
       label = String(new Date(ts)).substr(4, 3)
@@ -107,9 +107,10 @@ module.exports = ({
     if (dateX.getYear() !== thisYear) {
       label = `${label} '${String(dateX.getFullYear()).substr(-2)}`
     }
-    axis += `    <text x="${x}" y="${y}"${anchor}>${label}</text>\n`
+    axis += `      <text x="${x}">${label}</text>\n` // y = 0
   }
-  axis += '  </svg>'
+  axis += `    </g>\n`
+  axis += '  </g>'
 
   return `
 <svg viewBox="0 0 ${imageWidth} ${imageHeight}" fill="transparent" xmlns="http://www.w3.org/2000/svg"${fontSize ? ` font-size="${fontSize}"` : ''}>
