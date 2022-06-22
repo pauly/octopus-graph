@@ -39,7 +39,7 @@ const hackyWidthOfLabelPerDay = day => {
 
 const dataSets = [electricity] // popex graph function needs an array of arrays
 const labels = ['Kwh 💡'] // popex graph function wants an optional array of labels
-const description = 'Energy usage graph - 🕖 is usage at getting up time, just curious'
+const description = 'Energy usage graph - ⏰ is usage at getting up time, just curious'
 const border = '#999' // colours
 const colors = ['#9e9', '#99e', '#e99'] // colours
 const width = 800
@@ -76,7 +76,7 @@ function addComment ({ x, y, maxX, maxY, color, label, ts, value }) {
   if (wakeUpTime) {
     const cost = (rate * sum) / 100 // no standingCharge this time
     const top = parseInt(y - 30 - 5 * Math.random(), 10)
-    const text = `🕖 £${cost.toFixed(2)}`
+    const text = `⏰ £${cost.toFixed(2)}`
     return svgComment({ x, y, top, color, text })
   }
   // another label for the peak usage
