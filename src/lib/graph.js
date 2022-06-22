@@ -26,6 +26,7 @@ module.exports = ({
   description,
   rounding = 100,
   margin = 30,
+  step = false,
   height = 300,
   width = 900 }) => {
   const marginTop = margin
@@ -58,14 +59,15 @@ module.exports = ({
     let y = 0
     const comments = []
     const descriptionTag = `<desc>${label} graph line</desc>`
-    const path = '<polyline points="' + Object.values(chartData).map(pair => {
+    const path = '<polyline points="' + Object.values(chartData).reduce((path, pair) => {
       [ts, value] = pair
       x = marginLeft + Math.round((ts - floorX) / (ceilX - floorX) * maxWidth)
       const height = Math.round((value - floorY) / (ceilY - floorY) * maxHeight)
       y = maxHeight + marginTop - height
       comments.push(addComment({ x, y, maxX, maxY, color, label, ts, value, comments }))
-      return [x, y]
-    }).filter(Boolean).join(' ') + '" fill="none" />'
+      path.push([x, y])
+      return path
+    }, []).filter(Boolean).join(' ') + '" fill="none" />'
     return `<g stroke="${color}">\n    ${descriptionTag}\n    ${path}\n  </g>\n  <text fill="${color}" x="${x}" y="${y}">${label || value}</text>${comments.length ? '\n  ' + comments.filter(Boolean).join('\n  ') : ''}`
   }
 
