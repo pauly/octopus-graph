@@ -39,7 +39,7 @@ const hackyWidthOfLabelPerDay = day => {
 
 const dataSets = [electricity] // popex graph function needs an array of arrays
 const labels = ['Kwh 💡'] // popex graph function wants an optional array of labels
-const description = 'Energy usage graph'
+const description = 'Energy usage graph - 🕖 is usage at getting up time, just curious'
 const border = '#999' // colours
 const colors = ['#9e9', '#99e', '#e99'] // colours
 const width = 800
@@ -49,7 +49,8 @@ const rounding = 1
 const fontSize = '0.6em'
 let sum = 0
 
-const svgComment = ({ x, y, top, width, height = 12, color, text }) => {
+const svgComment = ({ x, y, top, height = 12, color, text }) => {
+  const width = String(text).length * 5
   return `<g stroke="${color}">
     <line x1="${x}" y1="${y}" x2="${x}" y2="${top}" />
     <rect x="${x - (width - 10)}" y="${top}" width="${width}" height="${height}" fill="#fff" />
@@ -67,25 +68,24 @@ function addComment ({ x, y, maxX, maxY, color, label, ts, value }) {
   if (endOfDay) {
     const cost = (standingCharge + rate * sum) / 100
     const top = parseInt(5 + 5 * Math.random(), 10)
-    const width = hackyWidthOfLabelPerDay(thisDay.getDay()) || 48
+    const text = `${thisDay.toDateString().substr(0, 3)} £${cost.toFixed(2)} ${sum.toFixed(1)}${label}`
     sum = 0 // reset sum, we only really want the sum per day
-    const text = `${thisDay.toDateString().substr(0, 3)} £${cost.toFixed(2)}`
-    return svgComment({ x, y, top, width, color, text })
+    return svgComment({ x, y, top, color, text })
   }
   const wakeUpTime = (thisDay.getHours() === 7 && thisDay.getMinutes() === 0)
   if (wakeUpTime) {
     const cost = (rate * sum) / 100 // no standingCharge this time
     const top = parseInt(y - 30 - 5 * Math.random(), 10)
     const text = `🕖 £${cost.toFixed(2)}`
-    return svgComment({ x, y, top, width: 40, color, text })
+    return svgComment({ x, y, top, color, text })
   }
   // another label for the peak usage
   if (value === maxY) {
     if (ts !== maxX) {
       const text = `⚠️ ${value.toFixed(2)}${label}`
-      const width = 60
+      const width = text.length * 5
       const height = 12
-      return svgComment({ x: x + width, y, top: y - height, width, color, text })
+      return svgComment({ x: x + width, y, top: y - height, color, text })
     }
   }
   // could add other labels here?
