@@ -57,6 +57,7 @@ module.exports = ({
     chartData.sort(byTimestamp)
     let x = 0
     let y = 0
+    let prevY = null
     const comments = []
     const descriptionTag = `<desc>${label} graph line</desc>`
     const path = '<polyline points="' + Object.values(chartData).reduce((path, pair) => {
@@ -65,7 +66,13 @@ module.exports = ({
       const height = Math.round((value - floorY) / (ceilY - floorY) * maxHeight)
       y = maxHeight + marginTop - height
       comments.push(addComment({ x, y, maxX, maxY, color, label, ts, value, comments }))
-      path.push([x, y])
+      if (step && prevY !== null && prevY !== y) {
+        path.push([x, prevY])
+        path.push([x, y])
+      } else {
+        path.push([x, y])
+      }
+      prevY = y
       return path
     }, []).filter(Boolean).join(' ') + '" fill="none" />'
     return `<g stroke="${color}">\n    ${descriptionTag}\n    ${path}\n  </g>\n  <text fill="${color}" x="${x}" y="${y}">${label || value}</text>${comments.length ? '\n  ' + comments.filter(Boolean).join('\n  ') : ''}`
