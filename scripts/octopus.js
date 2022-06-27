@@ -25,11 +25,14 @@ const fromOctopusToPair = ({ consumption, interval_start, interval_end }) => {
     consumption
   ]
 }
-const lastWeek = new Date()
+
+const allElectricity = require('../data/electricity_this_week').results
+const maxDate = allElectricity.map(value => value.interval_start).sort().pop()
+const lastWeek = new Date(maxDate)
 lastWeek.setDate(lastWeek.getDate() - 7)
 lastWeek.setHours(0, 0, 0, 0)
 const thisWeek = (pair) => pair[0] > lastWeek.getTime()
-const electricity = require('../data/electricity_this_week').results.map(fromOctopusToPair).filter(thisWeek)
+const electricity = allElectricity.map(fromOctopusToPair).filter(thisWeek)
 
 const dataSets = [electricity] // popex graph function needs an array of arrays
 const labels = ['Kwh 💡'] // popex graph function wants an optional array of labels

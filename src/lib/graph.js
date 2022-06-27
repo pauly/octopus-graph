@@ -84,8 +84,10 @@ module.exports = ({
   axis += `  <g fill="${border}" text-anchor="end" transform="translate(${marginLeft}, ${maxHeight + marginTop})">\n`
 
   let interval = 5000
-  while (interval >= ceilY) {
-    interval = interval / 10
+  if (ceilY > 0) {
+    while (interval >= ceilY) {
+      interval = interval / 10
+    }
   }
   for (let value = 0; value < ceilY; value += interval) {
     if (value < floorY) continue
