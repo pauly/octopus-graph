@@ -31,17 +31,11 @@ lastWeek.setHours(0, 0, 0, 0)
 const thisWeek = (pair) => pair[0] > lastWeek.getTime()
 const electricity = require('../data/electricity_this_week').results.map(fromOctopusToPair).filter(thisWeek)
 
-const hackyWidthOfLabelPerDay = day => {
-  if (day === 1) return 48 // wider for the M in Mon
-  if (day === 3) return 48 // wider for the W in Wed
-  return 43
-}
-
 const dataSets = [electricity] // popex graph function needs an array of arrays
 const labels = ['Kwh 💡'] // popex graph function wants an optional array of labels
 const description = 'Energy usage graph - 🕖 is usage at getting up time, just curious'
 const border = '#999' // colours
-const colors = ['#9e9', '#99e', '#e99'] // colours
+const colors = ['#9e9', '#99e', '#e99']
 const width = 800
 const height = 80
 const margin = 15
@@ -61,7 +55,8 @@ const svgComment = ({ x, y, top, height = 12, color, text }) => {
 // popex graph function takes an optional addComment hook,
 // it is provided these params which we can use to drop a label in
 // at a point on the graph
-function addComment ({ x, y, maxX, maxY, color, label, ts, value }) {
+function addComment ({ x, y, maxX, maxY, color, label, pair }) {
+  const [ts, value] = pair
   sum += value
   const thisDay = new Date(ts)
   const endOfDay = (thisDay.getHours() === 23 && thisDay.getMinutes() === 30)
@@ -75,7 +70,7 @@ function addComment ({ x, y, maxX, maxY, color, label, ts, value }) {
   const wakeUpTime = (thisDay.getHours() === 7 && thisDay.getMinutes() === 0)
   if (wakeUpTime) {
     const cost = (rate * sum) / 100 // no standingCharge this time
-    const top = parseInt(y - 30 - 5 * Math.random(), 10)
+    const top = parseInt(y - 20 - 5 * Math.random(), 10)
     const text = `🕖 £${cost.toFixed(2)}`
     return svgComment({ x, y, top, color, text })
   }

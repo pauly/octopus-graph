@@ -65,7 +65,7 @@ module.exports = ({
       x = marginLeft + Math.round((ts - floorX) / (ceilX - floorX) * maxWidth)
       const height = Math.round((value - floorY) / (ceilY - floorY) * maxHeight)
       y = maxHeight + marginTop - height
-      comments.push(addComment({ x, y, maxX, maxY, color, label, ts, value, comments }))
+      comments.push(addComment({ x, y, maxX, maxY, color, label, pair, comments }))
       if (step && prevY !== null && prevY !== y) {
         path.push([x, prevY])
         path.push([x, y])
