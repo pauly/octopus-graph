@@ -59,7 +59,9 @@ module.exports = ({
     let y = 0
     let prevY = null
     const comments = []
-    const descriptionTag = `<desc>${label} graph line</desc>`
+    const min = Math.min.apply(null, chartData.map(pair => pair[1]))
+    const max = Math.max.apply(null, chartData.map(pair => pair[1]))
+    const descriptionTag = `<desc>Graph line from ${min} to ${max}${label}</desc>`
     const path = '<polyline points="' + Object.values(chartData).reduce((path, pair) => {
       [ts, value] = pair
       x = marginLeft + Math.round((ts - floorX) / (ceilX - floorX) * maxWidth)
@@ -75,13 +77,18 @@ module.exports = ({
       prevY = y
       return path
     }, []).filter(Boolean).join(' ') + '" fill="none" />'
-    return `<g stroke="${color}">\n    ${descriptionTag}\n    ${path}\n  </g>\n  <text fill="${color}" x="${x}" y="${y}">${label || value}</text>${comments.length ? '\n  ' + comments.filter(Boolean).join('\n  ') : ''}`
+    let commentsTag = ''
+    if (comments.length) {
+      commentsTag = '\n  ' + comments.filter(Boolean).join('\n  ')
+    }
+    return `<g stroke="${color}">\n    ${descriptionTag}\n    ${path}\n  </g>\n  <text fill="${color}" x="${x}" y="${y}">${label || value}</text>${commentsTag}`
   }
 
   const priceLine = dataSets.map((chartData, index) => line(chartData, colors[index] || 'black', labels && labels[index])).join('\n  ')
 
   let axis = `<path d="m ${marginLeft} ${marginTop} v ${maxHeight} h ${maxWidth} h -${maxWidth} v -${maxHeight} z" stroke="${border}" stroke-width="2" />\n`
   axis += `  <g fill="${border}" text-anchor="end" transform="translate(${marginLeft}, ${maxHeight + marginTop})">\n`
+  axis += `    <desc>Y axis of graph</desc>\n`
 
   let interval = 5000
   if (ceilY > 0) {
@@ -100,6 +107,8 @@ module.exports = ({
   ts = firstDateLabelX.getTime()
   const stepInMonths = (ceilX - floorX) / (1000 * 60 * 60 * 24) > 30
   axis += `    <g text-anchor="start" transform="translate(0, ${margin})">\n`
+  axis += `      <desc>X axis of graph</desc>\n`
+  let previousMonth = null
   while (ts < ceilX) {
     const dateX = new Date(ts)
     if (stepInMonths) {
@@ -111,9 +120,13 @@ module.exports = ({
     }
     ts = dateX.getTime()
     const x = Math.round((ts - floorX) / (ceilX - floorX) * maxWidth)
-    let label = String(new Date(ts)).substr(4, 6)
+    let label = String(dateX).substr(4, 6)
+    if (dateX.getMonth() === previousMonth) {
+      label = dateX.getDate()
+    }
+    previousMonth = dateX.getMonth()
     if (stepInMonths) {
-      label = String(new Date(ts)).substr(4, 3)
+      label = String(dateX).substr(4, 3)
     }
     if (dateX.getYear() !== thisYear) {
       label = `${label} '${String(dateX.getFullYear()).substr(-2)}`
